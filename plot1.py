@@ -9,8 +9,8 @@ import pickle
 import os
 
 # This file is to plot phase curve models (will plot 68% region and not random models)
-instrument = 'IRAC2'
-pout = os.getcwd() + '/Analysis/Test1'
+instrument = 'TESS14'
+pout = os.getcwd() + '/Analysis/Test2_kelt9'
 
 G = con.G.value
 
@@ -22,14 +22,21 @@ post = pickle.load(open(pout + '/_dynesty_DNS_posteriors.pkl', 'rb'))
 samples = post['posterior_samples']
 
 try:
-    C2 = post['C2_p1_' + instrument]
+    C2 = samples['C2_p1_' + instrument]
 except:
     C2 = np.zeros(100)
 
 try:
-    D2 = post['D2_p1_' + instrument]
+    D2 = samples['D2_p1_' + instrument]
 except:
     D2 = np.zeros(100)
+
+try:
+    GP_S0, GP_Q, GP_rho = samples['GP_S0'], samples['GP_Q'], samples['GP_rho']
+    GP = True
+except:
+    GP_S0, GP_Q, GP_rho = np.zeros(100), np.zeros(100), np.zeros(100)
+    GP = False
 
 ## Dummy times (we will need these dummy data only for non-juliet models: 
 # for juliet models, we will replace the dummy data with the real data later)
@@ -78,7 +85,8 @@ _, flux_norm, gp_model, total_model, _ = \
                      q2=np.nanmedian(samples['q2_' + instrument]), E=np.nanmedian(samples['E_p1_' + instrument]),\
                      C1=np.nanmedian(samples['C1_p1_' + instrument]), D1=np.nanmedian(samples['D1_p1_' + instrument]),\
                      C2=np.nanmedian(C2), D2=np.nanmedian(D2), mflx=np.nanmedian(samples['mflux_' + instrument]),\
-                     sigw=np.nanmedian(samples['sigma_w_' + instrument]), LTTD=True, rst=rst)
+                     sigw=np.nanmedian(samples['sigma_w_' + instrument]), GP=GP, GP_S0=np.nanmedian(GP_S0),\
+                     GP_Q=np.nanmedian(GP_Q), GP_rho=np.nanmedian(GP_rho), LTTD=True, rst=rst)
 
 detrended_fl[instrument] = (fl7 - gp_model) * (1 + mflx)
 residuals[instrument] = (fl7 - total_model) * 1e6
@@ -156,7 +164,8 @@ for i in range(50):
 
 ax1.set_ylabel('Relative flux [ppm]', fontsize=14, fontfamily='serif')
 ax1.set_xlim([xlim1, xlim2])
-ax1.set_ylim([-300, 50])
+#ax1.set_ylim([-300, 50])
+ax1.set_ylim([-8000, 1000])
 
 ax1.tick_params(labelfontfamily='serif')
 ax1.set_xticks(ticks=np.array([-0.04, 0.0, 0.04]))
@@ -172,7 +181,8 @@ ax2.axhline(0.0, lw=2., color='navy', zorder=10)
 ax2.set_xlabel('Orbital Phase', fontsize=14, fontfamily='serif')
 ax2.set_ylabel('Residuals [ppm]', fontsize=14, fontfamily='serif')
 ax2.set_xlim([xlim1, xlim2])
-ax2.set_ylim([-50., 50.])
+#ax2.set_ylim([-50., 50.])
+ax2.set_ylim([-200., 200.])
 
 ax2.set_xticks(ticks=np.array([-0.04, 0.0, 0.04]), labels=np.array([-0.04, 0.0, 0.04]))
 ax2.tick_params(labelfontfamily='serif')
@@ -193,7 +203,8 @@ for i in range(50):
 
 ax3.set_ylabel('Relative flux [ppm]', rotation=270, fontsize=14, labelpad=25, fontfamily='serif')
 ax3.set_xlim([xlim3, xlim4])
-ax3.set_ylim([-50., 100.])
+#ax3.set_ylim([-50., 100.])
+ax3.set_ylim([-100., 750.])
 
 ax3.yaxis.tick_right()
 ax3.tick_params(labelright=True, labelfontfamily='serif')
@@ -210,7 +221,8 @@ ax4.axhline(0., lw=2., color='navy')
 ax4.set_xlabel('Orbital Phase', fontsize=14, fontfamily='serif')
 ax4.set_ylabel('Residuals [ppm]', rotation=270, fontsize=14, labelpad=25, fontfamily='serif')
 ax4.set_xlim([xlim3, xlim4])
-ax4.set_ylim([-30., 30.])
+#ax4.set_ylim([-30., 30.])
+ax4.set_ylim([-70., 70.])
 
 ax4.yaxis.tick_right()
 ax4.tick_params(labelright=True, labelfontfamily='serif')
