@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from celerite2.terms import SHOTerm
+from celerite2 import GaussianProcess
 import corner
 import pickle
 from glob import glob
@@ -157,7 +159,7 @@ def CowanPC_model(times, te, per, E, C1, D1, C2, D2):
 
 
 def evaluate_CowanPC(times, fluxes, errors, t0, per, rprs, bb, ar, ecc, omega, q1, q2, E, C1, D1, C2, D2,\
-                     mflx, sigw, LTTD=True, rst=None):
+                     mflx, sigw, GP=False, GP_S0=None, GP_Q=None, GP_rho=None, LTTD=True, rst=None):
     
     times = times.astype('float64')
 
@@ -213,10 +215,20 @@ def evaluate_CowanPC(times, fluxes, errors, t0, per, rprs, bb, ar, ecc, omega, q
 
     # Now, if GP=True, compute the GP model (and also, loglikelihood)
     vars = errors**2 + (sigw*1e-6)**2
-    loglike = gaussian_log_likelihood(resids, vars)
+    if GP:
+        ker = SHOTerm(S0=GP_S0, Q=GP_Q, rho=GP_rho)
+        gp = GaussianProcess(ker, mean=0.)
+        gp.compute(times, diag=vars, quiet=True)
+        
+        loglike = gp.log_likelihood(resids)
+        gp_model = gp.predict(y=resids, t=times, return_cov=False)
+    else:
+        gp_model = np.zeros(len(times))
+        loglike = gaussian_log_likelihood(resids, vars)
 
-    total_model = flux_norm
-    return phy_model, flux_norm, total_model, loglike
+    total_model = flux_norm + gp_model
+
+    return phy_model, flux_norm, gp_model, total_model, loglike
 
 def corner_plot(folder, planet_only=False):
     pcl = glob(folder + '/*.pkl')[0]
