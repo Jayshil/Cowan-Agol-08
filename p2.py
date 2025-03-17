@@ -161,7 +161,7 @@ def loglike(x):
     ar = ((parameters['rho'] * G * ((parameters['P_p1'] * 24. * 3600.)**2)) / (3. * np.pi))**(1. / 3.)
 
     # And computing log-likelihood
-    _, _, _, log_like = \
+    _, _, _, _, log_like = \
         evaluate_CowanPC(times=tim[instrument], fluxes=fl[instrument], errors=fle[instrument], t0=parameters['t0_p1'],\
                          per=parameters['P_p1'], rprs=parameters['p_p1'], bb=parameters['b_p1'], ar=ar, ecc=parameters['ecc_p1'],\
                          omega=parameters['omega_p1'], q1=parameters['q1_' + instrument], q2=parameters['q2_' + instrument],\
@@ -229,7 +229,7 @@ for p in range(len(fixed_params)):
 
 ar = ((np.nanmedian(samples['rho']) * G * ((np.nanmedian(samples['P_p1']) * 24. * 3600.)**2)) / (3. * np.pi))**(1. / 3.)
 
-_, _, total_model, _ = \
+_, _, _, total_model, _ = \
     evaluate_CowanPC(times=tim[instrument], fluxes=fl[instrument], errors=fle[instrument], t0=np.nanmedian(samples['t0_p1']),\
                      per=np.nanmedian(samples['P_p1']), rprs=np.nanmedian(samples['p_p1']), bb=np.nanmedian(samples['b_p1']), ar=ar,\
                      ecc=np.nanmedian(samples['ecc_p1']), omega=np.nanmedian(samples['omega_p1']), q1=np.nanmedian(samples['q1_' + instrument]),\

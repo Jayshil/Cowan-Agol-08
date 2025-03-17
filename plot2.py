@@ -93,7 +93,7 @@ dummy_fl, dummy_fle = np.zeros(len(tims)), np.zeros(len(tims))
 plt.plot(tims, (phy_model-1.)*1e6, 'k-')
 ## Random models
 for i in range(50):
-    random_model, _, _, _ = \
+    random_model, _, _, _, _ = \
             evaluate_CowanPC(times=tims, fluxes=dummy_fl, errors=dummy_fle, t0=np.random.choice(samples['t0_p1']),\
                              per=np.random.choice(samples['P_p1']), rprs=np.random.choice(samples['p_p1']), bb=np.random.choice(samples['b_p1']),\
                              ar=np.nanmedian(ar), ecc=0., omega=90., q1=np.random.choice(samples['q1_' + instrument]),\

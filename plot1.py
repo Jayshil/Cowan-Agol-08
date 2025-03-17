@@ -71,7 +71,7 @@ phases_pc[instrument] = juliet.utils.get_phases(t=tim7, P=np.nanmedian(samples['
 mflx = np.nanmedian(samples['mflux_' + instrument])
 
 ## And the GP and linear models (to detrend the data)
-_, flux_norm, total_model, _ = \
+_, flux_norm, gp_model, total_model, _ = \
     evaluate_CowanPC(times=tim7, fluxes=fl7, errors=fle7, t0=np.nanmedian(samples['t0_p1']),\
                      per=np.nanmedian(samples['P_p1']), rprs=np.nanmedian(samples['p_p1']), bb=np.nanmedian(samples['b_p1']),\
                      ar=np.nanmedian(ar), ecc=0., omega=90., q1=np.nanmedian(samples['q1_' + instrument]),\
@@ -80,7 +80,7 @@ _, flux_norm, total_model, _ = \
                      C2=np.nanmedian(C2), D2=np.nanmedian(D2), mflx=np.nanmedian(samples['mflux_' + instrument]),\
                      sigw=np.nanmedian(samples['sigma_w_' + instrument]), LTTD=True, rst=rst)
 
-detrended_fl[instrument] = fl7 * (1 + mflx)
+detrended_fl[instrument] = (fl7 - gp_model) * (1 + mflx)
 residuals[instrument] = (fl7 - total_model) * 1e6
 
 
@@ -114,7 +114,7 @@ random_models = np.zeros((50, len(dummy_tim)))
 ar = ((samples['rho'] * G * ((samples['P_p1'] * 24. * 3600.)**2)) / (3. * np.pi))**(1. / 3.)
 
 ## First computing median models
-median_model, _, _, _ = \
+median_model, _, _, _, _ = \
     evaluate_CowanPC(times=dummy_tim, fluxes=dummy_fl, errors=dummy_fle, t0=np.nanmedian(samples['t0_p1']),\
                      per=np.nanmedian(samples['P_p1']), rprs=np.nanmedian(samples['p_p1']), bb=np.nanmedian(samples['b_p1']),\
                      ar=np.nanmedian(ar), ecc=0., omega=90., q1=np.nanmedian(samples['q1_' + instrument]),\
@@ -125,7 +125,7 @@ median_model, _, _, _ = \
 
 ## Random models
 for i in range(50):
-    random_models[i,:], _, _, _ = \
+    random_models[i,:], _, _, _, _ = \
             evaluate_CowanPC(times=dummy_tim, fluxes=dummy_fl, errors=dummy_fle, t0=np.random.choice(samples['t0_p1']),\
                              per=np.random.choice(samples['P_p1']), rprs=np.random.choice(samples['p_p1']), bb=np.random.choice(samples['b_p1']),\
                              ar=np.nanmedian(ar), ecc=0., omega=90., q1=np.random.choice(samples['q1_' + instrument]),\
